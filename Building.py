@@ -1,6 +1,9 @@
 import random
+import uuid
+
 
 from DeliverySite import DeliverySite
+from FileLogHandler import FileLogHandler
 from ReceivingSite import ReceivingSite
 from Stock import Stock
 from Warehouse import Warehouse
@@ -12,24 +15,26 @@ class Building:
     receivingSites: ReceivingSite = []
     warehouse: Warehouse = 0
     workers: Worker = []
+    file_log_handler: FileLogHandler = None
 
-    def __init__(self, quantityOfDeliverySites, quantityOfReceivingSite, quantityOfworkers, warehouseSize):
+    def __init__(self, quantityOfDeliverySites, quantityOfReceivingSite, quantityOfworkers, warehouseSize, file_log_handler):
         self.createDeliverySite(quantityOfDeliverySites)
         self.createReicievingSite(quantityOfReceivingSite)
         self.createWorkers(quantityOfworkers)
         self.warehouse = Warehouse(warehouseSize)
+        self.file_log_handler = file_log_handler
 
     def createDeliverySite(self, quantityOfDeliverySites):
         for i in range(quantityOfDeliverySites):
-            self.deliverySites.append(DeliverySite(i))
+            self.deliverySites.append(DeliverySite(uuid.uuid4()))
 
     def createReicievingSite(self, quantityOfDeliverySites):
         for i in range(quantityOfDeliverySites):
-            self.receivingSites.append(ReceivingSite(i))
+            self.receivingSites.append(ReceivingSite(uuid.uuid4()))
 
     def createWorkers(self, quantityOfworkers):
         for i in range(quantityOfworkers):
-            self.workers.append(Worker(i))
+            self.workers.append(Worker(uuid.uuid4()))
 
     def add_worker(self):
         self.workers.append(Worker(len(self.workers) + 1))
@@ -45,8 +50,17 @@ class Building:
             if isinstance(site, ReceivingSite):
                 if site.stock == None:
                     # todo zamien to na dodanie Managerow dodawania i dobre id np UUID
-                    site.add_stock(Stock(random.randint(1,100)))
+                    random_uuid = uuid.uuid4()
+                    site.add_stock(Stock(random_uuid))
+                    etap_1_log = f"ETAP 1: Stock o UUID:{random_uuid} zostal stworzony"
+                    print(etap_1_log)
+                    self.file_log_handler.append_log(etap_1_log)
                     break
+
+    # def moveStockToWarehouse(self):
+    #     for worker in self.workers:
+    #         if isinstance(worker, Worker):
+    #             if worker.state.ResourceState.check_state()
 
     def __str__(self):
         print("Magazyn:")

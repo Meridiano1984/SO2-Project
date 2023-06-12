@@ -1,8 +1,12 @@
+import threading
+
 class StockKeepingUnit:
-    x = 0
-    y = 0
+    id = 0
+    lock = threading.Lock()
     stock = None
 
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def add_stock(self, stock):
+        self.stock = stock
+
+    def __init__(self, id):
+        self.id = id

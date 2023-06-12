@@ -15,6 +15,9 @@ class ReceivingSite:
         finally:
             self.lock.release()
 
+    def add_stock_no_lock(self, stock):
+        self.stock = stock
+
     def __str__(self):
         if self.stock is None:
             return "Delivery Site: id:" + str(self.id) + " stock:None"
