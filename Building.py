@@ -57,11 +57,6 @@ class Building:
                     self.file_log_handler.append_log(etap_1_log)
                     break
 
-    # def moveStockToWarehouse(self):
-    #     for worker in self.workers:
-    #         if isinstance(worker, Worker):
-    #             if worker.state.ResourceState.check_state()
-
     def __str__(self):
         print("Magazyn:")
         print("pracownikow: " + str(len(self.workers)))

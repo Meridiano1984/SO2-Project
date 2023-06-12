@@ -1,39 +1,17 @@
-import threading
-import time
-
 from Building import Building
 from FileLogHandler import FileLogHandler
 from Statistics import Statistics
-
-menu = """////----MENU----////
-          1 -> uruchom symulacje magazynu
-          2 -> zakoncz symulacje magazynu
-          3 -> prezentacja statystyk
-          4 -> wyjdz z programu
-          """
-
-
 import threading
 import time
-
 from WorkerManagementService import WorkerManagementService
 
 
-
 time_to_delivery_stock = 3.5
-
-
-# menu = """dodanie robotnika w, dodanie stacji odbierajcaej r, dodanie stacji wydajacej d, dodanie stocku do reaciving station k, wyjdz 'kill' """
 log_handler = FileLogHandler()
 log_handler.clear_file()
 building = Building(4,4,10,20,log_handler)
 statistic_collector = Statistics(building.workers, building.receivingSites, building.deliverySites, building.warehouse.grid)
 worker_managment_service = WorkerManagementService(statistic_collector, log_handler)
-
-
-
-# Współdzielona wartość
-value = 0
 
 # Flaga informująca, czy wątek powinien zostać zakończony
 should_exit = False
@@ -43,13 +21,14 @@ def printing_response(array_response):
         fixed_log = log[:-2]
         print(fixed_log)
 
-def statistic_menu():
+def log_menu():
     min_menu ="""////----operacje na logach
                  1-> znajdz hisotirie stock o wybranym id
                  2-> znajdz wszystkie zamowiania danego workera
                  3-> przesledz historie danego sku
                  4-> przesledz historie danej stacji odbierajacej
                  5-> przesledz historie danej stacji wydajacej"""
+    print(min_menu)
     choice = input("->: ")
     if choice == "1":
         statistic_collector.print_stocks_delicered_id_list()
@@ -75,44 +54,46 @@ def statistic_menu():
         printing_response(log_handler.find_lines_with_phrase(UUID_choice))
 
 # Funkcja dla wątku wczytującego znaki
+
+def simulation_menu():
+    global should_exit
+    print("Symulacja uruchominona, aby wyjsc napisz: kill")
+    input_char = input()
+    if input_char == "kill":
+        should_exit = True
+
 def read_input():
-    global value
     global should_exit
     global building
+
+
+    menuv2 = """////----MENU----////
+                1-> uruchom symulacje
+                2-> wylacz symulacje
+                3-> pokaz statystki
+                4-> eksploruj logi"""
     while not False:
-        print(menu)
+        print(menuv2)
         # Wczytanie znaku z klawiatury
         input_char = input("->: ")
         if input_char == "w":
             building.add_worker()
         elif input_char == "d":
             building.add_delivery_site()
-        # elif input_char == "1":
-        #     simulation_start()
-        # elif input_char == "2":
-        #     simulation_stop()
+        # elif input_char == "70":
+            # start_simulation()
         elif input_char == "3":
             statistic_collector.print_all_stats()
-        elif input_char == "5":
-            statistic_menu()
+        elif input_char == "4":
+            log_menu()
         elif input_char == "r":
             building.add_receiving_sites()
         elif input_char == "k":
             building.add_stock_to_receiving_sites()
-        elif input_char == "kill":
+        elif input_char == "s":
             should_exit = True
             break
 
-
-        # print(building.__str__())
-
-        # Jeśli wpisano "kill", ustaw flagę should_exit na True
-        # if input_char == "kill":
-        #     should_exit = True
-        #     break
-
-        # Inkrementacja wartości
-        # value += 1
 
 def creating_stock():
     global building
@@ -134,72 +115,33 @@ def move_stock_from_warehouse_to_delivery_site():
         worker_managment_service.move_stock_from_warehouse_to_delivery_site(building.workers, building.deliverySites, building.warehouse)
 
 
-# Funkcja dla wątku inkrementującego wartość co sekundę
-def increment_value():
-    global value
-    while not should_exit:
-        # Inkrementacja wartości
-        value += 1
-        # print(f'Wartość: {value}')
-
-        # Odczekanie sekundy
-        time.sleep(1)
-
-# print(menu)
-
-# Tworzenie wątków
-
 input_thread = threading.Thread(target=read_input)
 input_thread.start()
 
-# creating_stock_thread: threading.Thread = None
-# moving_stock_from_receiving_station_to_warehouse_thread: threading.Thread = None
-# moving_stock_from_warehouse_to_delivery_site_thread: threading.Thread = None
+temp_fixture = input("")
 
-# increment_thread = threading.Thread(target=increment_value)
 creating_stock_thread = threading.Thread(target=creating_stock)
-moving_stock_from_receiving_station_to_warehouse_thread = threading.Thread(
-    target=moving_stock_from_receiving_station_to_warehouse)
-moving_stock_from_warehouse_to_delivery_site_thread = threading.Thread(
-    target=move_stock_from_warehouse_to_delivery_site)
+moving_stock_from_receiving_station_to_warehouse_thread = threading.Thread(target=moving_stock_from_receiving_station_to_warehouse)
+moving_stock_from_warehouse_to_delivery_site_thread = threading.Thread(target=move_stock_from_warehouse_to_delivery_site)
 
-
-# def simulation_start():
-    # if status == "1":
-
-
-        # Uruchamianie wątków
-        # increment_thread.start()
 creating_stock_thread.start()
 moving_stock_from_receiving_station_to_warehouse_thread.start()
 moving_stock_from_warehouse_to_delivery_site_thread.start()
-    # if status == "2":
-    #     creating_stock_thread.join()
-    #     moving_stock_from_receiving_station_to_warehouse_thread.join()
-    #     moving_stock_from_warehouse_to_delivery_site_thread.join()
 
-
-# Czekanie na zakończenie wątków
-# increment_thread.join()
-# def simulation_stop():
 creating_stock_thread.join()
 moving_stock_from_receiving_station_to_warehouse_thread.join()
 moving_stock_from_warehouse_to_delivery_site_thread.join()
-
-worker_managment_service.statistic_collector.print_all_stats()
-
-input_thread = threading.Thread(target=read_input)
-input_thread.start()
-
-print("cooooo")
 input_thread.join()
 
+# nowe
+input_thread2 = threading.Thread(target=read_input)
+input_thread2.start()
+
+# print("cooooo")
+input_thread2.join()
 
 
 
 
-def exit_program():
-    input_thread.join()
-    print(value)
 
 

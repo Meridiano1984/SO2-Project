@@ -1,7 +1,6 @@
 import threading
 
 from Stock import Stock
-import ResourceState
 
 
 class DeliverySite:
@@ -11,7 +10,6 @@ class DeliverySite:
 
     def __init__(self, id):
         self.id = id
-        self.ResourceSate = ResourceState
 
     def take_stock(self, stock):
         self.stock = stock

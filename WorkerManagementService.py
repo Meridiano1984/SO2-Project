@@ -23,12 +23,8 @@ class WorkerManagementService:
         # Sprawdzamy czy sa wolni workerzy i czy sa stacja wolene ktore maja Stock
         for worker in workers:
             if isinstance(worker, Worker) and not worker.lock.locked():
-                # print(f"Wolny pracownik o id:{worker.id}")
                 for receivingSite in receivingSites:
                     if isinstance(receivingSite, ReceivingSite) and not receivingSite.lock.locked() and receivingSite.stock is not None:
-                        # print(f"Wolna stacja o id:{receivingSite.id}")
-                        # print(f"Wolny pracownik o id:{worker.id}")
-                        # print(f"Pracosnik o id:{worker.id}, rozpoczyna zadanie ze stacja przyjmujacej o id:{receivingSite.id}")
                         worker.lock.acquire()
                         receivingSite.lock.acquire()
                         try:
@@ -41,8 +37,6 @@ class WorkerManagementService:
                             etap_2_log = f"ETAP 2: Pracownik o id:{worker.id} odebral Stok o UUID:{worker.stock.id} ze stacji przyjmujacej o id:{receivingSite.id}"
                             print(etap_2_log)
                             self.file_log_handler.append_log(etap_2_log)
-                            # print(f"Pracownik o id:{worker.id} odebral przesylke z stacji przyjmujacej o id:{receivingSite.id}")
-
                             time.sleep(2.0)
 
                             # szukamy wolnego miejsca w gridzie
@@ -54,7 +48,6 @@ class WorkerManagementService:
                                             sku.lock.acquire()
                                             sku.add_stock(worker.stock)
                                             worker.stock = None
-                                            # print(f"Pracownik o id:{worker.id} dostarczył przesylke do miejsca o id:{sku.id}")
                                             etap_3_log = f"ETAP 3: Pracownik o id:{worker.id} przeniosl Stok o UUID:{sku.stock.id} do sku o id:{sku.id}"
                                             print(etap_3_log)
                                             self.file_log_handler.append_log(etap_3_log)
@@ -62,12 +55,6 @@ class WorkerManagementService:
                                         finally:
                                             sku.lock.release()
                                             return
-                                        # kod do ewentualnego rozwarznei przypadku pelenego grida
-                                        # else:
-                                        # print("Nie ma wolnego miejsca w magazynie, Stock jest zwracany na stacje przyjmujacej")
-                                        # receivingSite.add_stock_no_lock(worker.stock)
-                                        # worker.stock = None
-                                        # print(f"Pracownik o id:{worker.id} zwrocil przesylke do stacji przyjmujacej o id:{receivingSite.id}")
                         finally:
                             worker.lock.release()
                             receivingSite.lock.release()
@@ -85,9 +72,7 @@ class WorkerManagementService:
                                         worker.lock.acquire()
                                         sku.lock.acquire()
                                         deliverySite.lock.acquire()
-                                        # print(f"ETAP 3: Pracownik o id:{worker.id} przeniosl przesylke o UUID:{worker.stock.id} do sku o id:{sku.id}")
-                                        # todo zmien logow i nr etapow
-                                        etap_4_log = f"THREAD 2, ETAP 4: Pracownik o id:{worker.id} rozpoczyna przenisienie Stok o UUID:{sku.stock.id} z sku o id:{sku.id} do deliverySite o id:{deliverySite.id}"
+                                        etap_4_log = f"ETAP 4: Pracownik o id:{worker.id} rozpoczyna przenisienie Stok o UUID:{sku.stock.id} z sku o id:{sku.id} do deliverySite o id:{deliverySite.id}"
                                         print(etap_4_log)
                                         self.file_log_handler.append_log(etap_4_log)
                                         try:
@@ -96,8 +81,7 @@ class WorkerManagementService:
                                             worker.take_stock(sku.stock)
                                             sku.stock = None
 
-                                            # print(f"THREAD 2 Pracownik o id:{worker.id} odebral Stok z sku o id:{sku.id} ")
-                                            etap_5_log = f"THREAD 2, ETAP 5: Pracownik o id:{worker.id} odebral Stok o UUID:{worker.stock.id} z sku o id:{sku.id}"
+                                            etap_5_log = f"ETAP 5: Pracownik o id:{worker.id} odebral Stok o UUID:{worker.stock.id} z sku o id:{sku.id}"
                                             print(etap_5_log)
                                             self.file_log_handler.append_log(etap_5_log)
 
@@ -105,8 +89,7 @@ class WorkerManagementService:
                                             deliverySite.take_stock(worker.stock)
                                             worker.stock = None
                                             self.statistic_collector.add_delivered_stock_id(deliverySite.stock.id)
-                                            # print(f"THREAD 2, ETAP 5: Pracownik o id:{worker.id} odebral Stok o UUID:{worker.stock.id} z sku o id:{sku.id}")
-                                            etap_6_log = f"THREAD 2, ETAP 6: Pracownik o id:{worker.id} przeniosl Stok o UUID:{deliverySite.stock.id} do deliverySite o id:{deliverySite.id}"
+                                            etap_6_log = f"ETAP 6: Pracownik o id:{worker.id} przeniosl Stok o UUID:{deliverySite.stock.id} do deliverySite o id:{deliverySite.id}"
                                             print(etap_6_log)
                                             self.file_log_handler.append_log(etap_6_log)
                                             deliverySite.stock = None
